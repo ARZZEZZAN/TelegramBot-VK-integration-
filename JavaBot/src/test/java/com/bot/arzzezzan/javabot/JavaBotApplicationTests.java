@@ -8,6 +8,7 @@ class JavaBotApplicationTests {
 
 	@Test
 	void contextLoads() {
+		System.out.println("Hello!");
 	}
 
 }
