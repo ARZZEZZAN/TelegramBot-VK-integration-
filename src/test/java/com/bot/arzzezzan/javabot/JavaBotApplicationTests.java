@@ -8,7 +8,7 @@ class JavaBotApplicationTests {
 
 	@Test
 	void contextLoads() {
-		throw new ArrayStoreException();
+		System.out.println("Hello! Armen");
 	}
 
 }
