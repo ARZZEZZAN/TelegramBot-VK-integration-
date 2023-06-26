@@ -14,7 +14,7 @@
 	<name>JavaBot</name>
 	<description>JavaBot</description>
 	<properties>
-		<java.version>18</java.version>
+		<java.version>16</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
