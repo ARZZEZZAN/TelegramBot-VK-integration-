@@ -2,10 +2,14 @@ package com.bot.arzzezzan.javabot.Bot;
 
 import com.bot.arzzezzan.javabot.Command.CommandContainer;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageServiceImpl;
+import com.bot.arzzezzan.javabot.Service.TelegramUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import javax.persistence.Access;
 
 import static com.bot.arzzezzan.javabot.Command.CommandName.UNKNOWN;
 
@@ -20,8 +24,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private CommandContainer commandContainer;
 
-    public TelegramBot() {
-        commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
+    @Autowired
+    public TelegramBot(TelegramUserService telegramUserService) {
+        commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this), telegramUserService);
     }
     @Override
     public void onUpdateReceived(Update update) {
