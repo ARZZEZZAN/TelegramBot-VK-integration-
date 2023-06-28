@@ -18,13 +18,17 @@ public class ApplicationConfiguration {
  private String DB_LOGIN;
  @Value("${db.password}")
  private String DB_PASSWORD;
+ @Value("${db.driver}")
+ private String DRIVER;
 
-// @Bean
-// public DataSource hikariDataSource() {
-//  HikariConfig hikariConfig = new HikariConfig();
-//  hikariConfig.setJdbcUrl(URL_DB);
-//  hikariConfig.setUsername(DB_LOGIN);
-//  hikariConfig.setPassword(DB_PASSWORD);
-//  return new HikariDataSource(hikariConfig);
-// }
+
+ @Bean
+ public DataSource hikariDataSource() {
+  HikariConfig hikariConfig = new HikariConfig();
+  hikariConfig.setDriverClassName(DRIVER);
+  hikariConfig.setJdbcUrl(URL_DB);
+  hikariConfig.setUsername(DB_LOGIN);
+  hikariConfig.setPassword(DB_PASSWORD);
+  return new HikariDataSource(hikariConfig);
+ }
 }
