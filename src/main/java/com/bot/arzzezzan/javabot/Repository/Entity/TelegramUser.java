@@ -12,7 +12,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "tg_user")
+@Table(name = "tg_user", schema = "bot")
 public class TelegramUser {
 
     @Id
