@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up PostgresSQL
-        uses: arzvard/postgres-action@v1.1
+        uses: arzvard/postgres-action@v3
         with:
           postgres version: '15.0.1'
           postgres database: 'arzvard'
