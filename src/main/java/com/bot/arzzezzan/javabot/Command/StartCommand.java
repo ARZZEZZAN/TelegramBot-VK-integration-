@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class StartCommand implements Command {
     private SendBotMessageService sendBotMessageService;
     private TelegramUserService telegramUserService;
-    private final String commandMessage = "Hello! I'm Telergam bot that will help you to be aware of" +
+    public static final String START_MESSAGE = "Hello! I'm Telergam bot that will help you to be aware of" +
             " recent news";
     public StartCommand(SendBotMessageService sendBotMessageService, TelegramUserService telegramUserService) {
         this.sendBotMessageService = sendBotMessageService;
@@ -32,6 +32,6 @@ public class StartCommand implements Command {
                 }
         );
 
-        sendBotMessageService.sendMessage(chatId, commandMessage);
+        sendBotMessageService.sendMessage(chatId, START_MESSAGE);
     }
 }
