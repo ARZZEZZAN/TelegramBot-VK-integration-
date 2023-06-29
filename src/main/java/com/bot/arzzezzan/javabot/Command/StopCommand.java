@@ -16,12 +16,12 @@ public class StopCommand implements Command  {
     @Override
     public void execute(Update update) {
         String chatId = update.getMessage().getChatId().toString();
-        sendBotMessageService.sendMessage(chatId, commandMessage);
         telegramUserService.findByChatId(chatId).ifPresent(
                 telegramUser -> {
                     telegramUser.setActive(false);
                     telegramUserService.save(telegramUser);
                 }
         );
+        sendBotMessageService.sendMessage(chatId, commandMessage);
     }
 }
