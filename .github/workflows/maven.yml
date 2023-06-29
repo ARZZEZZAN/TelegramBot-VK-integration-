@@ -21,13 +21,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up PostgresSQL
-        uses: arzvard/postgres-action@v3
-        with:
-          postgres version: '15.0.1'
-          postgres database: 'arzvard'
-          postgres root password: '1506'
-          postgres user: 'arzvard'
       - name: Set up JDK 18
         uses: actions/setup-java@v3
         with:
