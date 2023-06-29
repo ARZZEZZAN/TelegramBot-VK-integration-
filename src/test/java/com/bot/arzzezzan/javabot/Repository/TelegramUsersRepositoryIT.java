@@ -1,21 +1,14 @@
 package com.bot.arzzezzan.javabot.Repository;
 
 import com.bot.arzzezzan.javabot.Repository.Entity.TelegramUser;
-import com.bot.arzzezzan.javabot.Repository.TelegramUsersRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import javax.sql.DataSource;
-import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,10 +17,11 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 /**
  * Integration-level testing for {@link TelegramUsersRepository}.
  */
+
 @ActiveProfiles("test")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = NONE)
-public class TelegramUserRepositoryIT {
+public class TelegramUsersRepositoryIT {
 
 	@Autowired
 	private TelegramUsersRepository telegramUserRepository;
