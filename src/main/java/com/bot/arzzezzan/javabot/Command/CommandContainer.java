@@ -21,7 +21,7 @@ public class CommandContainer {
             commandHashMap.put(STOP.getCommandName(), new StopCommand(sendBotMessageService, telegramUserService));
             commandHashMap.put(HELP.getCommandName(), new HelpCommand(sendBotMessageService));
             commandHashMap.put(STAT.getCommandName(), new StatCommand(sendBotMessageService, telegramUserService));
-            commandHashMap.put(AUTH.getCommandName(), new AuthCommand(sendBotMessageService, telegramUserService));
+//            commandHashMap.put(AUTH.getCommandName(), new AuthCommand(sendBotMessageService, telegramUserService));
         };
     }
     public Command getCommand(String commandName) {
