@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class StopCommand implements Command  {
     private SendBotMessageService sendBotMessageService;
     private TelegramUserService telegramUserService;
-    public static final String STOP_MESSAGE = "Have deactivated your subscriptions";
+    public static final String STOP_MESSAGE = "Have deactivated your account";
     public StopCommand(SendBotMessageService sendBotMessageService, TelegramUserService telegramUserService) {
         this.sendBotMessageService = sendBotMessageService;
         this.telegramUserService = telegramUserService;
