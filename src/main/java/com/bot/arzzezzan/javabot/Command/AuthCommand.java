@@ -8,14 +8,13 @@ import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
+import com.vk.api.sdk.objects.users.Fields;
 import com.vk.api.sdk.objects.users.UserFull;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.objects.users.responses.GetResponse;
-import com.vk.api.sdk.queries.friends.FriendsGetOnlineQuery;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,12 +101,17 @@ public class AuthCommand implements Command {
         return suggFriends.toString();
     }
 
-    private void outputOfIds(VkApiClient vk, UserActor userActor, StringBuilder strFriends, int count, List<Integer> friends) throws ApiException, ClientException {
-        for (Integer friendId : friends) {
-            GetResponse friend = vk.users().get(userActor).userIds(String.valueOf(friendId)).execute().get(0);
-            strFriends.append(++count + ". ");
+    public void outputOfIds(VkApiClient vk, UserActor userActor, StringBuilder strFriends, int count, List<Integer> friends) throws ApiException, ClientException {
+        List<GetResponse> friendInfo = vk.users().get(userActor)
+                .userIds(friends.stream().map(String::valueOf).toArray(String[]::new))
+                .fields(Fields.FIRST_NAME_ABL, Fields.LAST_NAME_ABL)
+                .execute();
+
+        for (GetResponse friend : friendInfo) {
+            strFriends.append(++count).append(". ");
             String friendLink = "<a href=\"https://vk.com/id" + friend.getId() + "\">" + friend.getFirstName() + " " + friend.getLastName() + "</a>";
             strFriends.append(friendLink).append("\n");
         }
     }
+
 }
