@@ -1,5 +1,6 @@
 package com.bot.arzzezzan.javabot.Command;
 
+import com.bot.arzzezzan.javabot.Command.VKCommand.AuthCommand;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageService;
 import com.bot.arzzezzan.javabot.Service.TelegramUserService;
 
