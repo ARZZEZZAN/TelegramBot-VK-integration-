@@ -27,7 +27,7 @@ public class FriendCommand implements Command {
     }
     @Override
     public void execute(Update update) {
-        sendBotMessageService.sendMessage(chatId, getOnlineFriends());
+        sendBotMessageService.sendMessage(update.getMessage().getChatId().toString(), getOnlineFriends());
     }
     public String getOnlineFriends() {
         StringBuilder onlineFriends = new StringBuilder();

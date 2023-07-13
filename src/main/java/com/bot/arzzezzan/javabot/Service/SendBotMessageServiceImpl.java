@@ -9,14 +9,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Service
 public class SendBotMessageServiceImpl implements SendBotMessageService {
     private TelegramBot telegramBot;
-    private String chatId;
     @Autowired
     public SendBotMessageServiceImpl(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
     }
     @Override
     public void sendMessage(String chatId, String message) {
-        this.chatId = chatId;
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.enableHtml(true);
