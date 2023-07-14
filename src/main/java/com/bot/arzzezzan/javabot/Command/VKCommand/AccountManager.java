@@ -30,6 +30,8 @@ public class AccountManager {
             friendCommand.execute(update);
         } else if (FriendManagerName.getListOfEnum().contains(callbackData)) {
             friendCommand.callbackHandler(update, callbackData);
+        } else if (FriendManagerName.getListOfEnum().contains(callbackData)) {
+            friendCommand.callbackHandler(update, callbackData);
         }
     }
 }

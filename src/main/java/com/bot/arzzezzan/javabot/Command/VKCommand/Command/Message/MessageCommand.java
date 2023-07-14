@@ -1,4 +1,4 @@
-package com.bot.arzzezzan.javabot.Command.VKCommand.Command.Friend;
+package com.bot.arzzezzan.javabot.Command.VKCommand.Command.Message;
 
 import com.bot.arzzezzan.javabot.Command.Command;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageService;
@@ -19,13 +19,13 @@ import java.util.List;
 
 import static com.bot.arzzezzan.javabot.Command.VKCommand.Command.Friend.FriendManagerName.*;
 
-public class FriendCommand implements Command {
+public class MessageCommand implements Command {
     private SendBotMessageService sendBotMessageService;
     private VkApiClient vk;
     private UserActor userActor;
     private static final String friendMessage = "You can manage your list of friends!";
 
-    public FriendCommand(SendBotMessageService sendBotMessageService, VkApiClient vk, UserActor userActor) {
+    public MessageCommand(SendBotMessageService sendBotMessageService, VkApiClient vk, UserActor userActor) {
         this.userActor = userActor;
         this.vk = vk;
         this.sendBotMessageService = sendBotMessageService;
