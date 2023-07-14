@@ -31,7 +31,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     public TelegramBot(TelegramUserService telegramUserService) {
-        SendBotMessageService sendBotMessageService = new SendBotMessageServiceImpl(this);
+        sendBotMessageService = new SendBotMessageServiceImpl(this);
         commandContainer = new CommandContainer(sendBotMessageService, telegramUserService);
     }
     @Override

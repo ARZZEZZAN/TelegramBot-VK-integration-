@@ -1,7 +1,7 @@
 package com.bot.arzzezzan.javabot.Command.VKCommand;
 
-import com.bot.arzzezzan.javabot.Command.Command;
-import com.bot.arzzezzan.javabot.Command.VKCommand.Command.FriendCommand;
+import com.bot.arzzezzan.javabot.Command.VKCommand.Command.Friend.FriendCommand;
+import com.bot.arzzezzan.javabot.Command.VKCommand.Command.Friend.FriendManagerName;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageService;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -9,7 +9,7 @@ import com.vk.api.sdk.httpclient.HttpTransportClient;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.bot.arzzezzan.javabot.Command.VKCommand.AuthCommand.CLIENT_ID;
-import static com.bot.arzzezzan.javabot.Command.VKCommand.AuthCommand.FRIEND_BUTTON;
+import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.FRIEND;
 
 public class AccountManager {
     private Update update;
@@ -25,9 +25,11 @@ public class AccountManager {
 
         String callbackData = update.getCallbackQuery().getData();
 
-        if(callbackData.equals(FRIEND_BUTTON)){
-            Command command = new FriendCommand(sendBotMessageService, vk, userActor);
-            command.execute(update);
+        FriendCommand friendCommand = new FriendCommand(sendBotMessageService, vk, userActor);
+        if(callbackData.equals(FRIEND.getCommandName())){
+            friendCommand.execute(update);
+        } else if (FriendManagerName.getListOfEnum().contains(callbackData)) {
+            friendCommand.callbackHandler(update, callbackData);
         }
     }
 }

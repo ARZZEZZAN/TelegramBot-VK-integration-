@@ -13,9 +13,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.FRIEND;
+
+
 @Component
 public class AuthCommand implements Command {
-    public final static String FRIEND_BUTTON = "Friend";
     public final static String CLIENT_ID = "51700494";
     private final static String USER_ID = "429866479";
     private final static String REDIRECT_URI = "https://oauth.vk.com/blank.html";
@@ -39,10 +41,8 @@ public class AuthCommand implements Command {
     }
 
     private String getAuthorizationUrl() {
-        return "Для регистрации перейдите по ссылке: <a>https://oauth.vk.com/authorize?client_id=" + CLIENT_ID +
-                "&display=page&redirect_uri=" + REDIRECT_URI +
-                "&scope=offline,friends&response_type=token&v=" + VK_API_VERSION +
-                "</a>";
+        return "Для регистрации перейдите по ссылке: <a href=\"https://oauth.vk.com/authorize?client_id=" + CLIENT_ID + "&display=page&redirect_uri=" + REDIRECT_URI +
+                "&scope=groups,offline,friends,wall,messages&response_type=token&v=" + VK_API_VERSION + "\">ссылка на авторизацию</a>";
     }
 
     public void handleAuthorizationResponse() {
@@ -55,8 +55,8 @@ public class AuthCommand implements Command {
         List<InlineKeyboardButton> rowInLine = new ArrayList<>();
         InlineKeyboardButton friendButton = new InlineKeyboardButton();
 
-        friendButton.setText("Friends");
-        friendButton.setCallbackData(FRIEND_BUTTON);
+        friendButton.setText("Друзья");
+        friendButton.setCallbackData(FRIEND.getCommandName());
 
         rowInLine.add(friendButton);
         rowsInLine.add(rowInLine);
