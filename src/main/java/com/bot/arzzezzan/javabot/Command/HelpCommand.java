@@ -7,12 +7,13 @@ import static com.bot.arzzezzan.javabot.Command.CommandName.*;
 
 public class HelpCommand implements Command {
     private SendBotMessageService sendBotMessageService;
-    public static final String HELP_MESSAGE = String.format("✨<b>Available commands</b>✨\n"
-                    + "%s - Start working with bot\n"
-                    + "%s - Stop working with bot\n"
-                    + "%s - Count of active users\n"
+    public static final String HELP_MESSAGE = String.format("✨<b>Доступные комманды</b>✨\n"
+                    + "%s - Начать работу с ботом!\n"
+                    + "%s - Остановить работу с ботом\n"
+                    + "%s - Количество активных пользователей\n"
+                    + "%s - Авторизация в ВКонтакте\n"
                     + "%s - Take help about my skills\n",
-            START.getCommandName(), STOP.getCommandName(), HELP.getCommandName(), STAT.getCommandName());
+            START.getCommandName(), STOP.getCommandName(), HELP.getCommandName(), STAT.getCommandName(), AUTH.getCommandName());
     public HelpCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
     }
