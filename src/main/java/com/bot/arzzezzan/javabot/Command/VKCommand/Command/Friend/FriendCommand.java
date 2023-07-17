@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.bot.arzzezzan.javabot.Command.VKCommand.Command.Friend.FriendManagerName.*;
-import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.FRIEND;
 
 public class FriendCommand implements Command {
     private SendBotMessageService sendBotMessageService;
@@ -35,7 +34,7 @@ public class FriendCommand implements Command {
     public void execute(Update update) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(update.getCallbackQuery().getMessage().getChatId()));
-        message.setText("Регистрация прошла успешно, можете управлять своим аккаунтом!");
+        message.setText("Управляйте своим списком друзей!");
 
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();

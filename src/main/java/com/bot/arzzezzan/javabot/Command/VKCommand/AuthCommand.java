@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.FRIEND;
+import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.NEWS;
 
 
 @Component
@@ -42,7 +43,7 @@ public class AuthCommand implements Command {
 
     private String getAuthorizationUrl() {
         return "Для регистрации перейдите по ссылке: <a href=\"https://oauth.vk.com/authorize?client_id=" + CLIENT_ID + "&display=page&redirect_uri=" + REDIRECT_URI +
-                "&scope=groups,offline,friends,wall,messages&response_type=token&v=" + VK_API_VERSION + "\">ссылка на авторизацию</a>";
+                "&scope=photos,likes,groups,friends,wall,stats&response_type=token&v=" + VK_API_VERSION + "\">ссылка на авторизацию</a>";
     }
 
     public void handleAuthorizationResponse() {
@@ -54,11 +55,15 @@ public class AuthCommand implements Command {
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
         List<InlineKeyboardButton> rowInLine = new ArrayList<>();
         InlineKeyboardButton friendButton = new InlineKeyboardButton();
+        InlineKeyboardButton newsButton = new InlineKeyboardButton();
 
         friendButton.setText("Друзья");
         friendButton.setCallbackData(FRIEND.getCommandName());
+        newsButton.setText("Новости");
+        newsButton.setCallbackData(NEWS.getCommandName());
 
         rowInLine.add(friendButton);
+        rowInLine.add(newsButton);
         rowsInLine.add(rowInLine);
 
         markupInLine.setKeyboard(rowsInLine);

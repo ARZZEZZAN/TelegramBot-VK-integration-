@@ -1,7 +1,8 @@
 package com.bot.arzzezzan.javabot.Command.VKCommand;
 
 public enum CommandManagerName {
-    FRIEND("Friend");
+    FRIEND("Friend"),
+    NEWS("News");
 
     private final String commandName;
     CommandManagerName(String commandName) {
