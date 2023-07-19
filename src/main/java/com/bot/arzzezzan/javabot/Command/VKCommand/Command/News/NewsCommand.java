@@ -81,7 +81,7 @@ public class NewsCommand implements Command {
                     Group group = vk.groups().getByIdObjectLegacy(userActor).
                             groupId(String.valueOf(Math.abs(item.getOneOf0().getSourceId()))).execute().get(0);
                     String groupName = group.getName();
-                    text = "[" + groupName + "]\n" + text;
+                    text = "Группа: " + groupName + "\n\n" + text;
                 }
                 newsBuilder.append(text).append("\n");
                 List<WallpostAttachment> attachments = item.getOneOf0().getAttachments();

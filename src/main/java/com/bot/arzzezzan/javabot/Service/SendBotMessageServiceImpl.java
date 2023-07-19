@@ -2,6 +2,7 @@ package com.bot.arzzezzan.javabot.Service;
 
 import com.bot.arzzezzan.javabot.Bot.TelegramBot;
 import com.vk.api.sdk.objects.photos.Photo;
+import com.vk.api.sdk.objects.video.Video;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -58,5 +59,9 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
         } catch (IOException | TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void sendVideo(String chatId, Video video, String text) {
     }
 }
