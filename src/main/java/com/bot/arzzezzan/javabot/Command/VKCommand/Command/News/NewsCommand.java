@@ -66,15 +66,15 @@ public class NewsCommand implements Command {
     public void callbackHandler(Update update, String callbackData) {
         this.update = update;
         if(callbackData.equals(LIST.getCommandName())){
-            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
-                    getLists());
+                    getLists();
         }
     }
-    private String getLists() {
+    private void getLists() {
         StringBuilder newsBuilder = new StringBuilder();
-        int count = 0;
+        Photo photo;
         try {
-            NewsfeedNewsfeedItemOneOf item = vk.newsfeed().get(userActor).execute().getItems().get(0);
+            List<NewsfeedNewsfeedItemOneOf> items = vk.newsfeed().get(userActor).count(5).execute().getItems();
+            for(NewsfeedNewsfeedItemOneOf item : items) {
                 String text = item.getOneOf0().getText();
 
                 if (item.getOneOf0().getSourceId() < 0) {
@@ -83,25 +83,26 @@ public class NewsCommand implements Command {
                     String groupName = group.getName();
                     text = "[" + groupName + "]\n" + text;
                 }
-
+                newsBuilder.append(text).append("\n");
                 List<WallpostAttachment> attachments = item.getOneOf0().getAttachments();
                 if (attachments != null && !attachments.isEmpty()) {
                     for (WallpostAttachment attachment : attachments) {
-                        if(attachment.getPhoto() != null){
-                            Photo photo = attachment.getPhoto();
+                        if (attachment.getPhoto() != null) {
+                            photo = attachment.getPhoto();
                             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
-                                    photo);
-                        } else if(attachment.getVideo() != null) {
-                            text = text + "\nvideo\n";
+                                    photo, newsBuilder.toString());
+                        } else {
+                            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+                                    newsBuilder.toString());
                         }
                     }
                 }
-                newsBuilder.append(++count).append(". ").append(text).append("\n");
+                newsBuilder = new StringBuilder();
+            }
         } catch (ClientException | ApiException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
-        return newsBuilder.toString();
     }
 }

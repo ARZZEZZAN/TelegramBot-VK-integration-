@@ -45,7 +45,7 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     }
 
     @Override
-    public void sendPhoto(String chatId, Photo photo) throws MalformedURLException {
+    public void sendPhoto(String chatId, Photo photo, String text) throws MalformedURLException {
         String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
         URL url = new URL(photoUrl);
         try(InputStream inputStream = url.openStream()) {
@@ -53,6 +53,7 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
             InputFile file = new InputFile(new ByteArrayInputStream(photoBytes), "photo.jpg");
 
             SendPhoto sendPhoto = new SendPhoto(chatId, file);
+            sendPhoto.setCaption(text);
             telegramBot.execute(sendPhoto);
         } catch (IOException | TelegramApiException e) {
             throw new RuntimeException(e);
