@@ -1,4 +1,4 @@
-package com.bot.arzzezzan.javabot.Command.VKCommand.Command;
+package com.bot.arzzezzan.javabot.Command.VKCommand.Command.Friend;
 
 import com.bot.arzzezzan.javabot.Command.Command;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageService;
@@ -9,10 +9,15 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.users.Fields;
 import com.vk.api.sdk.objects.users.UserFull;
 import com.vk.api.sdk.objects.users.responses.GetResponse;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.bot.arzzezzan.javabot.Command.VKCommand.Command.Friend.FriendManagerName.*;
 
 public class FriendCommand implements Command {
     private SendBotMessageService sendBotMessageService;
@@ -27,9 +32,47 @@ public class FriendCommand implements Command {
     }
     @Override
     public void execute(Update update) {
-        sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(), getOnlineFriends());
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(update.getCallbackQuery().getMessage().getChatId()));
+        message.setText("Управляйте своим списком друзей!");
+
+        InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+        List<InlineKeyboardButton> rowInLine = new ArrayList<>();
+        InlineKeyboardButton recentButton = new InlineKeyboardButton();
+        InlineKeyboardButton onlineButton = new InlineKeyboardButton();
+        InlineKeyboardButton suggestbutton = new InlineKeyboardButton();
+
+        recentButton.setText("Недавние");
+        recentButton.setCallbackData(RECENT.getCommandName());
+        onlineButton.setText("Онлайн");
+        onlineButton.setCallbackData(ONLINE.getCommandName());
+        suggestbutton.setText("Возможные");
+        suggestbutton.setCallbackData(SUGGEST.getCommandName());
+
+        rowInLine.add(recentButton);
+        rowInLine.add(onlineButton);
+        rowInLine.add(suggestbutton);
+        rowsInLine.add(rowInLine);
+
+        markupInLine.setKeyboard(rowsInLine);
+        message.setReplyMarkup(markupInLine);
+
+        sendBotMessageService.sendMessageMarkup(message);
     }
-    public String getOnlineFriends() {
+    public void callbackHandler(Update update, String callbackData) {
+        if(callbackData.equals(ONLINE.getCommandName())){
+            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+                    getOnlineFriends());
+        } else if(callbackData.equals(RECENT.getCommandName())){
+            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+                    getRecent());
+        } else if(callbackData.equals(SUGGEST.getCommandName())){
+            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+                    getSuggests());
+        }
+    }
+    private String getOnlineFriends() {
         StringBuilder onlineFriends = new StringBuilder();
         int count = 0;
         try {
@@ -43,7 +86,7 @@ public class FriendCommand implements Command {
 
         return onlineFriends.toString();
     }
-    public String getRecent() {
+    private String getRecent() {
         StringBuilder recentFriends = new StringBuilder();
         int count = 0;
         try {
@@ -57,7 +100,7 @@ public class FriendCommand implements Command {
 
         return recentFriends.toString();
     }
-    public String getSuggests() {
+    private String getSuggests() {
         StringBuilder suggFriends = new StringBuilder();
         int count = 0;
         try {
