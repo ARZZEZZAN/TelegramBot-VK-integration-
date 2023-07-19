@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -62,6 +63,9 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     }
 
     @Override
-    public void sendVideo(String chatId, Video video, String text) {
+    public void sendVideo(String chatId, Video video, String text) throws MalformedURLException {
+        String videoUrl = "https://vk.com/video" + video.getOwnerId() + "_" + video.getId();
+        URL url = new URL(videoUrl);
+        SendVideo sendVideo = new SendVideo();
     }
 }

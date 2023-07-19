@@ -10,5 +10,5 @@ public interface SendBotMessageService {
     public void sendMessage(String chatId, String message);
     public void sendMessageMarkup(SendMessage message);
     public void sendPhoto(String chatId, Photo photo, String text) throws MalformedURLException;
-    public void sendVideo(String chatId, Video video, String text);
+    public void sendVideo(String chatId, Video video, String text) throws MalformedURLException;
 }

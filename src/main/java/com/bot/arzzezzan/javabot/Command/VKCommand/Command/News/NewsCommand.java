@@ -8,6 +8,7 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.groups.Group;
 import com.vk.api.sdk.objects.photos.Photo;
+import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -64,7 +65,6 @@ public class NewsCommand implements Command {
     }
     private void getLists() {
         StringBuilder newsBuilder = new StringBuilder();
-        Photo photo;
         try {
             List<NewsfeedNewsfeedItemOneOf> items = vk.newsfeed().get(userActor).count(5).execute().getItems();
             for(NewsfeedNewsfeedItemOneOf item : items) {
@@ -81,9 +81,13 @@ public class NewsCommand implements Command {
                 if (attachments != null && !attachments.isEmpty()) {
                     for (WallpostAttachment attachment : attachments) {
                         if (attachment.getPhoto() != null) {
-                            photo = attachment.getPhoto();
+                            Photo photo = attachment.getPhoto();
                             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     photo, newsBuilder.toString());
+                        } else if (attachment.getVideo() != null) {
+                            Video video = attachment.getVideo();
+                            sendBotMessageService.sendVideo(update.getCallbackQuery().getMessage().getChatId().toString(),
+                                    video, newsBuilder.toString());
                         } else {
                             sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     newsBuilder.toString());
