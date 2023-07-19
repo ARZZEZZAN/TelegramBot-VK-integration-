@@ -8,5 +8,5 @@ import java.net.MalformedURLException;
 public interface SendBotMessageService {
     public void sendMessage(String chatId, String message);
     public void sendMessageMarkup(SendMessage message);
-    public void sendPhoto(String chatId, Photo photo) throws MalformedURLException;
+    public void sendPhoto(String chatId, Photo photo, String text) throws MalformedURLException;
 }
