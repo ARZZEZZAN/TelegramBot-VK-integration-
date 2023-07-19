@@ -9,7 +9,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Service
 public class SendBotMessageServiceImpl implements SendBotMessageService {
@@ -41,13 +45,17 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     }
 
     @Override
-    public void sendPhoto(String chatId, String photoPath) {
-        System.out.println(photoPath);
-//        SendPhoto sendPhoto = new SendPhoto(chatId, new InputFile(new File(photoPath)));
-//        try {
-//            telegramBot.execute(sendPhoto);
-//        } catch (TelegramApiException telegramApiException) {
-//            telegramApiException.printStackTrace();
-//        }
+    public void sendPhoto(String chatId, Photo photo) throws MalformedURLException {
+        String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
+        URL url = new URL(photoUrl);
+        try(InputStream inputStream = url.openStream()) {
+            byte[] photoBytes = inputStream.readAllBytes();
+            InputFile file = new InputFile(new ByteArrayInputStream(photoBytes), "photo.jpg");
+
+            SendPhoto sendPhoto = new SendPhoto(chatId, file);
+            telegramBot.execute(sendPhoto);
+        } catch (IOException | TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

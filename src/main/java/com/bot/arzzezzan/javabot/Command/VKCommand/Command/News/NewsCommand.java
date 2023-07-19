@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,11 +74,9 @@ public class NewsCommand implements Command {
         StringBuilder newsBuilder = new StringBuilder();
         int count = 0;
         try {
-            GetResponse newsList = vk.newsfeed().get(userActor).count(5).execute();
-            for(NewsfeedNewsfeedItemOneOf item : newsList.getItems()) {
+            NewsfeedNewsfeedItemOneOf item = vk.newsfeed().get(userActor).execute().getItems().get(0);
                 String text = item.getOneOf0().getText();
 
-                // Получаем информацию о сообществе, если новость из него
                 if (item.getOneOf0().getSourceId() < 0) {
                     Group group = vk.groups().getByIdObjectLegacy(userActor).
                             groupId(String.valueOf(Math.abs(item.getOneOf0().getSourceId()))).execute().get(0);
@@ -90,16 +89,18 @@ public class NewsCommand implements Command {
                     for (WallpostAttachment attachment : attachments) {
                         if(attachment.getPhoto() != null){
                             Photo photo = attachment.getPhoto();
-                            String photoUrl = String.valueOf(photo.getSizes().get(photo.getSizes().size() - 1).getUrl());
                             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
-                                    photoUrl);
+                                    photo);
+                        } else if(attachment.getVideo() != null) {
+                            text = text + "\nvideo\n";
                         }
                     }
                 }
                 newsBuilder.append(++count).append(". ").append(text).append("\n");
-            }
         } catch (ClientException | ApiException e) {
             e.printStackTrace();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
         return newsBuilder.toString();
     }
