@@ -43,7 +43,7 @@ public class AuthCommand implements Command {
 
     private String getAuthorizationUrl() {
         return "Для регистрации перейдите по ссылке: <a href=\"https://oauth.vk.com/authorize?client_id=" + CLIENT_ID + "&display=page&redirect_uri=" + REDIRECT_URI +
-                "&scope=photos,likes,groups,friends,wall,stats, offline&response_type=token&v=" + VK_API_VERSION + "\">ссылка на авторизацию</a>";
+                "&scope=video,photos,likes,groups,friends,wall,stats,offline&response_type=token&v=" + VK_API_VERSION + "\">ссылка на авторизацию</a>";
     }
 
     public void handleAuthorizationResponse() {

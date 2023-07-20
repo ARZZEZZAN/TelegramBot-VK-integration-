@@ -3,6 +3,7 @@ package com.bot.arzzezzan.javabot.Service;
 import com.bot.arzzezzan.javabot.Bot.TelegramBot;
 import com.vk.api.sdk.objects.photos.Photo;
 import com.vk.api.sdk.objects.video.Video;
+import com.vk.api.sdk.objects.video.responses.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -63,9 +64,14 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     }
 
     @Override
-    public void sendVideo(String chatId, Video video, String text) throws MalformedURLException {
-        String videoUrl = "https://vk.com/video" + video.getOwnerId() + "_" + video.getId();
-        URL url = new URL(videoUrl);
-        SendVideo sendVideo = new SendVideo();
+    public void sendVideo(String chatId, GetResponse response, String text) {
+        String videoUrl = response.getItems().get(0).getPlayer().toString();
+        try {
+            SendVideo sendVideo = new SendVideo(chatId, new InputFile(new URL(videoUrl).openStream(), "video.mp4"));
+            sendVideo.setCaption(text);
+            telegramBot.execute(sendVideo);
+        } catch (IOException | TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 }

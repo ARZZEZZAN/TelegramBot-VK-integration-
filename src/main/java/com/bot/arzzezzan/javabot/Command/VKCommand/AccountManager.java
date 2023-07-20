@@ -17,7 +17,7 @@ import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.NEW
 public class AccountManager {
     private Update update;
     private SendBotMessageService sendBotMessageService;
-    private static final String TOKEN = "vk1.a.VpM9CXNdNKxn4HHPeEajABrf6cgf49g6fWXwgcgnSgZCQqJE9NJz5G1uqOTURVdbjaVrwGCwrVpG55rFCFlUGcPmHSCFwP-7NTe20XpJoje2697wwbwQUhNPy8ESKW7pGS7SYXM2D86BqEQe7DsJIq8yskGA1aJWlCpzrfE6mazIo5kTHfBz5j7sSP1p5do64Ounh-q7qdUnHpvw90Ha-A";
+    private static final String TOKEN = "vk1.a.q407rkDM1GB6-6pZxwu3t_dtqYX40BfWyXfSVtYyofkyFfYOcS16xn6VocxPjATuR6zLecu8pw3Jo-ujxCJTUU6K-4hSbOFF7-kgdE8UoEimEk0lQu4ZlFKshMeMnOHfDHT2p1o9vwPspE-wrhnXj4H4Ge4K2xoiFDDESsdvIcbzEnNmDDjPLD-ae1eUGbph3YHjj7TYJFeOeXLpzLl91A";
     public AccountManager(Update update, SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
         this.update = update;

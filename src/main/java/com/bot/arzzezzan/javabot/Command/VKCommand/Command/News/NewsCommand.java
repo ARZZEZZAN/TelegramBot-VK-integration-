@@ -9,6 +9,7 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.groups.Group;
 import com.vk.api.sdk.objects.photos.Photo;
 import com.vk.api.sdk.objects.video.Video;
+import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -85,9 +86,11 @@ public class NewsCommand implements Command {
                             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     photo, newsBuilder.toString());
                         } else if (attachment.getVideo() != null) {
-                            Video video = attachment.getVideo();
+                            GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
+                                    attachment.getVideo().getId() + "_" +
+                                    attachment.getVideo().getAccessKey()).execute();
                             sendBotMessageService.sendVideo(update.getCallbackQuery().getMessage().getChatId().toString(),
-                                    video, newsBuilder.toString());
+                                    response, newsBuilder.toString());
                         } else {
                             sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     newsBuilder.toString());
