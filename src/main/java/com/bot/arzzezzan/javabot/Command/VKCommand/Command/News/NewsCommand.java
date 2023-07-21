@@ -13,6 +13,7 @@ import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -96,6 +97,10 @@ public class NewsCommand implements Command {
                                     attachment.getVideo().getAccessKey()).execute();
                             sendBotMessageService.sendVideo(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     response, newsBuilder.toString());
+                        } else if (attachment.getLink() != null) {
+                            newsBuilder.append(attachment.getLink().getUrl());
+                            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+                                    newsBuilder.toString());
                         } else {
                             sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     newsBuilder.toString());

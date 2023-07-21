@@ -73,7 +73,7 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
 
     @Override
     public void sendVideo(String chatId, GetResponse response, String text) {
-        String videoUrl = response.getItems().get(0).getPlayer().toString();
+        String videoUrl = String.valueOf(response.getItems().get(0).getFiles().getMp4240());
         try {
             SendVideo sendVideo = new SendVideo(chatId, new InputFile(new URL(videoUrl).openStream(), "video.mp4"));
             sendVideo.setCaption(text);
