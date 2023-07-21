@@ -10,6 +10,7 @@ import com.vk.api.sdk.objects.users.Fields;
 import com.vk.api.sdk.objects.users.UserFull;
 import com.vk.api.sdk.objects.users.responses.GetResponse;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -32,9 +33,7 @@ public class FriendCommand implements Command {
     }
     @Override
     public void execute(Update update) {
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(update.getCallbackQuery().getMessage().getChatId()));
-        message.setText("Управляйте своим списком друзей!");
+        String chatId = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
 
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -56,9 +55,14 @@ public class FriendCommand implements Command {
         rowsInLine.add(rowInLine);
 
         markupInLine.setKeyboard(rowsInLine);
-        message.setReplyMarkup(markupInLine);
 
-        sendBotMessageService.sendMessageMarkup(message);
+        EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
+        editMessageReplyMarkup.setChatId(chatId);
+        editMessageReplyMarkup.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+        editMessageReplyMarkup.setReplyMarkup(markupInLine);
+
+
+        sendBotMessageService.sendMessageMarkup(editMessageReplyMarkup);
     }
     public void callbackHandler(Update update, String callbackData) {
         if(callbackData.equals(ONLINE.getCommandName())){
