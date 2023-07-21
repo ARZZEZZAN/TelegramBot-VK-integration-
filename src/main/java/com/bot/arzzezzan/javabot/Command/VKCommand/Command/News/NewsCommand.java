@@ -1,6 +1,7 @@
 package com.bot.arzzezzan.javabot.Command.VKCommand.Command.News;
 
 import com.bot.arzzezzan.javabot.Command.Command;
+import com.bot.arzzezzan.javabot.Command.VKCommand.AuthCommand;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageService;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -13,6 +14,7 @@ import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -38,9 +40,7 @@ public class NewsCommand implements Command {
     @Override
     public void execute(Update update) {
         this.update = update;
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(update.getCallbackQuery().getMessage().getChatId()));
-        message.setText("Управляйте своими новостями!");
+        String chatId = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
 
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -48,20 +48,25 @@ public class NewsCommand implements Command {
         InlineKeyboardButton listButton = new InlineKeyboardButton();
 
         listButton.setText("Список");
-        listButton.setCallbackData(LIST.getCommandName());
+        listButton.setCallbackData(LIST.getCommandName()); // Здесь вы можете задать новое значение для коллбэк-данных кнопки
 
         rowInLine.add(listButton);
         rowsInLine.add(rowInLine);
 
         markupInLine.setKeyboard(rowsInLine);
-        message.setReplyMarkup(markupInLine);
 
-        sendBotMessageService.sendMessageMarkup(message);
+        EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
+        editMessageReplyMarkup.setChatId(chatId);
+        editMessageReplyMarkup.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+        editMessageReplyMarkup.setReplyMarkup(markupInLine);
+
+
+        sendBotMessageService.sendMessageMarkup(editMessageReplyMarkup);
     }
     public void callbackHandler(Update update, String callbackData) {
         this.update = update;
         if(callbackData.equals(LIST.getCommandName())){
-                    getLists();
+            getLists();
         }
     }
     private void getLists() {

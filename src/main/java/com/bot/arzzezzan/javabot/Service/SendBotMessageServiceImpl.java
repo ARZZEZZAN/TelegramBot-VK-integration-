@@ -2,13 +2,13 @@ package com.bot.arzzezzan.javabot.Service;
 
 import com.bot.arzzezzan.javabot.Bot.TelegramBot;
 import com.vk.api.sdk.objects.photos.Photo;
-import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -32,6 +32,14 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
         sendMessage.enableHtml(true);
         sendMessage.setText(message);
 
+        try {
+            telegramBot.execute(sendMessage);
+        } catch(TelegramApiException telegramApiException) {
+            telegramApiException.printStackTrace();
+        }
+    }
+    @Override
+    public void sendMessageMarkup(EditMessageReplyMarkup sendMessage) {
         try {
             telegramBot.execute(sendMessage);
         } catch(TelegramApiException telegramApiException) {
