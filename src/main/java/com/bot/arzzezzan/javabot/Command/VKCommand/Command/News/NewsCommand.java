@@ -73,14 +73,6 @@ public class NewsCommand implements Command {
         }
     }
     private void getLists() {
-//        SearchResponse response = vk.newsfeed().search(userActor).q("#video").count(5).execute();
-//        List<WallpostAttachmentType> videoAttachments = List.of(WallpostAttachmentType.VIDEO);
-//        response.getItems().stream()
-//                .flatMap(item -> item.getAttachments().stream())
-//                .filter(videoAttachments::contains)
-//                .forEach(video -> {
-//                    System.out.println(video.getVideo());
-//                });
         StringBuilder newsBuilder = new StringBuilder();
         try {
             List<NewsfeedNewsfeedItemOneOf> items = vk.newsfeed().get(userActor).count(5).execute().getItems();
@@ -100,26 +92,11 @@ public class NewsCommand implements Command {
                 if (attachments != null && !attachments.isEmpty()) {
                     for (WallpostAttachment attachment : attachments) {
                         if (attachment.getPhoto() != null) {
-                            if(text.length() > 1024) {
-                                text = newsBuilder.substring(0, 970) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("://vk.com/%d?w=wall{%d}_{%d}",
-                                        group.getId(),
-                                        group.getId(),
-                                        item.getOneOf0().getPostId())
-                                ;
-                            }
-                            Photo photo = attachment.getPhoto();
-                            sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
-                                    photo, newsBuilder.toString());
+                            photoAttachmentHandler(newsBuilder, item, group, text, attachment);
                         } else if (attachment.getVideo() != null) {
-                            GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
-                                    attachment.getVideo().getId() + "_" +
-                                    attachment.getVideo().getAccessKey()).execute();
-                            sendBotMessageService.sendVideo(update.getCallbackQuery().getMessage().getChatId().toString(),
-                                    response, newsBuilder.toString());
+                            videoAttachmentHandler(newsBuilder, attachment);
                         } else if (attachment.getLink() != null) {
-                            newsBuilder.append(attachment.getLink().getUrl());
-                            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
-                                    newsBuilder.toString());
+                            linkAttachmentHandler(newsBuilder, attachment);
                         } else {
                             sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     newsBuilder.toString());
@@ -136,5 +113,32 @@ public class NewsCommand implements Command {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void linkAttachmentHandler(StringBuilder newsBuilder, WallpostAttachment attachment) {
+        newsBuilder.append(attachment.getLink().getUrl());
+        sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+                newsBuilder.toString());
+    }
+
+    private void videoAttachmentHandler(StringBuilder newsBuilder, WallpostAttachment attachment) throws ApiException, ClientException, MalformedURLException {
+        GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
+                attachment.getVideo().getId() + "_" +
+                attachment.getVideo().getAccessKey()).execute();
+        sendBotMessageService.sendVideo(update.getCallbackQuery().getMessage().getChatId().toString(),
+                response, newsBuilder.toString());
+    }
+
+    private void photoAttachmentHandler(StringBuilder newsBuilder, NewsfeedNewsfeedItemOneOf item, Group group, String text, WallpostAttachment attachment) throws MalformedURLException {
+        if(text.length() > 1024) {
+            newsBuilder = new StringBuilder(newsBuilder.substring(0, 970) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("://vk.com/%d?w=wall{%d}_{%d}",
+                    group.getId(),
+                    group.getId(),
+                    item.getOneOf0().getPostId()))
+            ;
+        }
+        Photo photo = attachment.getPhoto();
+        sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
+                photo, newsBuilder.toString());
     }
 }
