@@ -1,4 +1,4 @@
-package com.bot.arzzezzan.javabot.Bot;
+package com.bot.arzzezzan.javabot.Command.VKCommand.Bot;
 
 import com.bot.arzzezzan.javabot.Command.CommandContainer;
 import com.bot.arzzezzan.javabot.Command.VKCommand.AccountManager;

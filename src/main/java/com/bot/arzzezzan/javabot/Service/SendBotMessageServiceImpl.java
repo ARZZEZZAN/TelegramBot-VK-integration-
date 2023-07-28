@@ -1,7 +1,8 @@
 package com.bot.arzzezzan.javabot.Service;
 
-import com.bot.arzzezzan.javabot.Bot.TelegramBot;
+import com.bot.arzzezzan.javabot.Command.VKCommand.Bot.TelegramBot;
 import com.vk.api.sdk.objects.photos.Photo;
+import com.vk.api.sdk.objects.video.VideoFull;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,7 +74,8 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
 
     @Override
     public void sendVideo(String chatId, GetResponse response, String text) {
-        String videoUrl = String.valueOf(response.getItems().get(0).getFiles().getMp4240());
+        VideoFull vi = response.getItems().get(0);
+        String videoUrl = String.valueOf(vi.getPlayer());
         try {
             SendVideo sendVideo = new SendVideo(chatId, new InputFile(new URL(videoUrl).openStream(), "video.mp4"));
             sendVideo.setCaption(text);
