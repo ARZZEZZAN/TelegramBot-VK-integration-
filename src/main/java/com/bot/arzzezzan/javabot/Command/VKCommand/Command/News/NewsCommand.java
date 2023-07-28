@@ -8,10 +8,12 @@ import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.groups.Group;
+import com.vk.api.sdk.objects.newsfeed.responses.SearchResponse;
 import com.vk.api.sdk.objects.photos.Photo;
 import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
+import com.vk.api.sdk.objects.wall.WallpostAttachmentType;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -71,23 +73,40 @@ public class NewsCommand implements Command {
         }
     }
     private void getLists() {
+//        SearchResponse response = vk.newsfeed().search(userActor).q("#video").count(5).execute();
+//        List<WallpostAttachmentType> videoAttachments = List.of(WallpostAttachmentType.VIDEO);
+//        response.getItems().stream()
+//                .flatMap(item -> item.getAttachments().stream())
+//                .filter(videoAttachments::contains)
+//                .forEach(video -> {
+//                    System.out.println(video.getVideo());
+//                });
         StringBuilder newsBuilder = new StringBuilder();
         try {
             List<NewsfeedNewsfeedItemOneOf> items = vk.newsfeed().get(userActor).count(5).execute().getItems();
             for(NewsfeedNewsfeedItemOneOf item : items) {
+                Group group;
                 String text = item.getOneOf0().getText();
-
-                if (item.getOneOf0().getSourceId() < 0) {
-                    Group group = vk.groups().getByIdObjectLegacy(userActor).
-                            groupId(String.valueOf(Math.abs(item.getOneOf0().getSourceId()))).execute().get(0);
-                    String groupName = group.getName();
+                group = vk.groups().getByIdObjectLegacy(userActor).
+                        groupId(String.valueOf(Math.abs(item.getOneOf0().getSourceId()))).execute().get(0);
+                String groupName = group.getName();
+                if(text != null) {
                     text = "Группа: " + groupName + "\n\n" + text;
+                } else {
+                    text = "Группа: " + groupName + "\n\n";
                 }
                 newsBuilder.append(text).append("\n");
                 List<WallpostAttachment> attachments = item.getOneOf0().getAttachments();
                 if (attachments != null && !attachments.isEmpty()) {
                     for (WallpostAttachment attachment : attachments) {
                         if (attachment.getPhoto() != null) {
+                            if(text.length() > 1024) {
+                                text = newsBuilder.substring(0, 970) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("://vk.com/%d?w=wall{%d}_{%d}",
+                                        group.getId(),
+                                        group.getId(),
+                                        item.getOneOf0().getPostId())
+                                ;
+                            }
                             Photo photo = attachment.getPhoto();
                             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
                                     photo, newsBuilder.toString());
