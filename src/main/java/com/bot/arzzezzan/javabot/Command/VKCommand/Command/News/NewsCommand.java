@@ -9,6 +9,9 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.groups.Group;
+import com.vk.api.sdk.objects.newsfeed.Filters;
+import com.vk.api.sdk.objects.newsfeed.ItemPhotoPhotos;
+import com.vk.api.sdk.objects.newsfeed.NewsfeedPhoto;
 import com.vk.api.sdk.objects.newsfeed.responses.SearchResponse;
 import com.vk.api.sdk.objects.photos.Photo;
 import com.vk.api.sdk.objects.video.Video;
@@ -26,6 +29,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.bot.arzzezzan.javabot.Command.VKCommand.Command.News.NewsManagerName.LIST;
 
@@ -76,7 +80,7 @@ public class NewsCommand implements Command {
     private void getLists() {
         StringBuilder newsBuilder = new StringBuilder();
         try {
-            List<NewsfeedNewsfeedItemOneOf> items = vk.newsfeed().get(userActor).count(5).execute().getItems();
+            List<NewsfeedNewsfeedItemOneOf> items = vk.newsfeed().get(userActor).count(5).filters(Filters.POST).execute().getItems();
             for(NewsfeedNewsfeedItemOneOf item : items) {
                 Group group;
                 String text = item.getOneOf0().getText();
@@ -100,9 +104,6 @@ public class NewsCommand implements Command {
                             linkAttachmentHandler(newsBuilder, attachment);
                         } else if(attachment.getDoc() != null) {
                             docAttachmentHandler(newsBuilder, attachment);
-                        } else {
-                            sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
-                                    newsBuilder.toString());
                         }
                     }
                 } else {
@@ -146,8 +147,9 @@ public class NewsCommand implements Command {
                 ;
             }
             Photo photo = attachment.getPhoto();
+            String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
-                    photo, newsBuilder.toString());
+                    photoUrl, newsBuilder.toString());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

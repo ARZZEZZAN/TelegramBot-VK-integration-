@@ -57,8 +57,7 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     }
 
     @Override
-    public void sendPhoto(String chatId, Photo photo, String text) throws MalformedURLException {
-        String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
+    public void sendPhoto(String chatId, String photoUrl, String text) throws MalformedURLException {
         URL url = new URL(photoUrl);
         try(InputStream inputStream = url.openStream()) {
             byte[] photoBytes = inputStream.readAllBytes();
