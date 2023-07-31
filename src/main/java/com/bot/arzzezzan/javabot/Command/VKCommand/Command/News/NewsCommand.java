@@ -14,7 +14,9 @@ import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
 
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -45,7 +47,10 @@ public class NewsCommand implements Command {
     @Override
     public void execute(Update update) {
         this.update = update;
-        String chatId = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
+
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(update.getCallbackQuery().getMessage().getChatId()));
+        message.setText("Управляйте своими нвостями!");
 
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -59,14 +64,10 @@ public class NewsCommand implements Command {
         rowsInLine.add(rowInLine);
 
         markupInLine.setKeyboard(rowsInLine);
-
-        EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
-        editMessageReplyMarkup.setChatId(chatId);
-        editMessageReplyMarkup.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-        editMessageReplyMarkup.setReplyMarkup(markupInLine);
+        message.setReplyMarkup(markupInLine);
 
 
-        sendBotMessageService.sendMessageMarkup(editMessageReplyMarkup);
+        sendBotMessageService.sendMessageMarkup(message);
     }
     public void callbackHandler(Update update, String callbackData) {
         this.update = update;

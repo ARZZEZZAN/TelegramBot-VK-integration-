@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
@@ -44,6 +45,16 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
             telegramApiException.printStackTrace();
         }
     }
+
+    @Override
+    public void sendMessage(EditMessageText editMessageText) {
+        try {
+            telegramBot.execute(editMessageText);
+        } catch(TelegramApiException telegramApiException) {
+            telegramApiException.printStackTrace();
+        }
+    }
+
     @Override
     public void sendMessagePost(String chatId, String message) {
         InlineKeyboardMarkup markupInLine = postControl();

@@ -5,6 +5,7 @@ public enum CommandName {
     STOP("/stop"),
     HELP("/help"),
     STAT("/stat"),
+    MENU("/menu"),
     AUTH("/auth"),
     UNKNOWN("")
     ;

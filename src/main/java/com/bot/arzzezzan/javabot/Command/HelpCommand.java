@@ -13,7 +13,7 @@ public class HelpCommand implements Command {
                     + "%s - Количество активных пользователей\n"
                     + "%s - Авторизация в ВКонтакте\n"
                     + "%s - Take help about my skills\n",
-            START.getCommandName(), STOP.getCommandName(), HELP.getCommandName(), STAT.getCommandName(), AUTH.getCommandName());
+            START.getCommandName(), STOP.getCommandName(), HELP.getCommandName(), STAT.getCommandName(), MENU.getCommandName());
     public HelpCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
     }
