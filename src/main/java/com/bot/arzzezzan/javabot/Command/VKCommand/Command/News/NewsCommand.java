@@ -19,6 +19,7 @@ import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.objects.wall.WallpostAttachmentType;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
+import org.apache.commons.io.IOUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -26,7 +27,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -125,6 +128,7 @@ public class NewsCommand implements Command {
 
     private void videoAttachmentHandler(StringBuilder newsBuilder, WallpostAttachment attachment) {
         try {
+
             GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
                     attachment.getVideo().getId() + "_" +
                     attachment.getVideo().getAccessKey()).execute();
@@ -132,7 +136,7 @@ public class NewsCommand implements Command {
                     response, newsBuilder.toString());
         } catch (ClientException | ApiException e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -140,11 +144,9 @@ public class NewsCommand implements Command {
     private void photoAttachmentHandler(StringBuilder newsBuilder, NewsfeedNewsfeedItemOneOf item, Group group, String text, WallpostAttachment attachment) {
         try {
             if (text.length() > 1024) {
-                newsBuilder = new StringBuilder(newsBuilder.substring(0, 970) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("://vk.com/%d?w=wall{%d}_{%d}",
+                newsBuilder = new StringBuilder(newsBuilder.substring(0, 940) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("https://vk.com/wall-%d_%d",
                         group.getId(),
-                        group.getId(),
-                        item.getOneOf0().getPostId()))
-                ;
+                        item.getOneOf0().getPostId()));
             }
             Photo photo = attachment.getPhoto();
             String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
