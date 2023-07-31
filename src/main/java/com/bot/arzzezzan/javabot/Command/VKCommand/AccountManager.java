@@ -17,19 +17,23 @@ import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.NEW
 public class AccountManager {
     private Update update;
     private SendBotMessageService sendBotMessageService;
+    FriendCommand friendCommand;
+    NewsCommand newsCommand;
     private static final String TOKEN = "vk1.a.q407rkDM1GB6-6pZxwu3t_dtqYX40BfWyXfSVtYyofkyFfYOcS16xn6VocxPjATuR6zLecu8pw3Jo-ujxCJTUU6K-4hSbOFF7-kgdE8UoEimEk0lQu4ZlFKshMeMnOHfDHT2p1o9vwPspE-wrhnXj4H4Ge4K2xoiFDDESsdvIcbzEnNmDDjPLD-ae1eUGbph3YHjj7TYJFeOeXLpzLl91A";
     public AccountManager(Update update, SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
         this.update = update;
-    }
-    public void commandManagerHandler() {
+
         VkApiClient vk = new VkApiClient(HttpTransportClient.getInstance());
         UserActor userActor = new UserActor(Integer.parseInt(CLIENT_ID), TOKEN);
 
+        friendCommand = new FriendCommand(sendBotMessageService, vk, userActor);
+        newsCommand = new NewsCommand(sendBotMessageService, vk, userActor);
+    }
+    public void commandManagerHandler() {
+
         String callbackData = update.getCallbackQuery().getData();
 
-        FriendCommand friendCommand = new FriendCommand(sendBotMessageService, vk, userActor);
-        NewsCommand newsCommand = new NewsCommand(sendBotMessageService, vk, userActor);
         if(callbackData.equals(FRIEND.getCommandName())){
             friendCommand.execute(update);
         } else if (FriendManagerName.getListOfEnum().contains(callbackData)) {
@@ -39,5 +43,8 @@ public class AccountManager {
         } else if (NewsManagerName.getListOfEnum().contains(callbackData)) {
             newsCommand.callbackHandler(update, callbackData);
         }
+    }
+    public void setUpdate(Update update) {
+        this.update = update;
     }
 }

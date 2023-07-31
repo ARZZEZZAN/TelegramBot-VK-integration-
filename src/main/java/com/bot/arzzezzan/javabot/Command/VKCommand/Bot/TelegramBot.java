@@ -36,6 +36,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
     @Override
     public void onUpdateReceived(Update update) {
+        if(accountManager == null) {
+            accountManager = new AccountManager(update, sendBotMessageService);
+        }
+        accountManager.setUpdate(update);
         if(update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText().trim();
             if(message.startsWith(COMMAND_PREFIX)) {
@@ -45,7 +49,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 commandContainer.getCommand(UNKNOWN.getCommandName()).execute(update);
             }
         } else if (update.hasCallbackQuery()) {
-            AccountManager accountManager = new AccountManager(update, sendBotMessageService);
             accountManager.commandManagerHandler();
         }
     }

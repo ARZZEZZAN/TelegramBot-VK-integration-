@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 public enum NewsManagerName {
     LIST("List"),
     RECENT("Recent"),
-    SUGGEST("Suggest")
+    SUGGEST("Suggest"),
+    NEXT("Next"),
+    BACK("Back")
     ;
     private final String commandName;
     private List<String> listofEnum;

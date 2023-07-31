@@ -1,7 +1,6 @@
 package com.bot.arzzezzan.javabot.Command.VKCommand.Command.News;
 
 import com.bot.arzzezzan.javabot.Command.Command;
-import com.bot.arzzezzan.javabot.Command.VKCommand.AuthCommand;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageService;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -10,18 +9,11 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.groups.Group;
 import com.vk.api.sdk.objects.newsfeed.Filters;
-import com.vk.api.sdk.objects.newsfeed.ItemPhotoPhotos;
-import com.vk.api.sdk.objects.newsfeed.NewsfeedPhoto;
-import com.vk.api.sdk.objects.newsfeed.responses.SearchResponse;
 import com.vk.api.sdk.objects.photos.Photo;
-import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
-import com.vk.api.sdk.objects.wall.WallpostAttachmentType;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
-import org.apache.commons.io.IOUtils;
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -34,14 +26,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.bot.arzzezzan.javabot.Command.VKCommand.Command.News.NewsManagerName.LIST;
+import static com.bot.arzzezzan.javabot.Command.VKCommand.Command.News.NewsManagerName.*;
 
 public class NewsCommand implements Command {
     private SendBotMessageService sendBotMessageService;
     private VkApiClient vk;
     private UserActor userActor;
+    private int messageId;
     private Update update;
-    private static final String friendMessage = "You can manage your list of friends!";
+    private boolean isEdit;
+    com.vk.api.sdk.objects.newsfeed.responses.GetResponse posts;
 
     public NewsCommand(SendBotMessageService sendBotMessageService, VkApiClient vk, UserActor userActor) {
         this.userActor = userActor;
@@ -76,15 +70,21 @@ public class NewsCommand implements Command {
     }
     public void callbackHandler(Update update, String callbackData) {
         this.update = update;
-        if(callbackData.equals(LIST.getCommandName())){
-            getLists();
+        if(callbackData.equals(LIST.getCommandName()) || callbackData.equals(NEXT.getCommandName())){
+            getNews();
+        } else if (callbackData.equals(BACK.getCommandName())) {
+            execute(update);
         }
     }
-    private void getLists() {
+    private void getNews() {
         StringBuilder newsBuilder = new StringBuilder();
+        String startFrom = null;
         try {
-            List<NewsfeedNewsfeedItemOneOf> items = vk.newsfeed().get(userActor).count(5).filters(Filters.POST).execute().getItems();
-            for(NewsfeedNewsfeedItemOneOf item : items) {
+            if(posts != null) {
+                startFrom = posts.getNextFrom();
+            }
+            posts = vk.newsfeed().get(userActor).count(1).startFrom(startFrom).filters(Filters.POST).execute();
+            for(NewsfeedNewsfeedItemOneOf item : posts.getItems()) {
                 Group group;
                 String text = item.getOneOf0().getText();
                 group = vk.groups().getByIdObjectLegacy(userActor).
@@ -110,7 +110,7 @@ public class NewsCommand implements Command {
                         }
                     }
                 } else {
-                    sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+                    sendBotMessageService.sendMessagePost(update.getCallbackQuery().getMessage().getChatId().toString(),
                             newsBuilder.toString());
                 }
                 newsBuilder = new StringBuilder();
@@ -122,13 +122,12 @@ public class NewsCommand implements Command {
 
     private void linkAttachmentHandler(StringBuilder newsBuilder, WallpostAttachment attachment) {
         newsBuilder.append(attachment.getLink().getUrl());
-        sendBotMessageService.sendMessage(update.getCallbackQuery().getMessage().getChatId().toString(),
+        sendBotMessageService.sendMessagePost(update.getCallbackQuery().getMessage().getChatId().toString(),
                 newsBuilder.toString());
     }
 
     private void videoAttachmentHandler(StringBuilder newsBuilder, WallpostAttachment attachment) {
         try {
-
             GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
                     attachment.getVideo().getId() + "_" +
                     attachment.getVideo().getAccessKey()).execute();
@@ -151,7 +150,7 @@ public class NewsCommand implements Command {
             Photo photo = attachment.getPhoto();
             String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
-                    photoUrl, newsBuilder.toString());
+                        photoUrl, newsBuilder.toString());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
