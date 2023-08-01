@@ -172,7 +172,7 @@ public class NewsCommand implements Command {
             }
             inputMediaPhotos.get(0).setCaption(newsBuilder.toString());
             sendBotMessageService.sendMedia(update.getCallbackQuery().getMessage().getChatId().toString(),
-                        inputMediaPhotos);
+                        inputMediaPhotos, newsBuilder.toString());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
