@@ -7,12 +7,10 @@ import com.vk.api.sdk.objects.video.responses.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.*;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -88,14 +86,23 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     }
 
     @Override
-    public void sendMedia(String chatId, List<InputMedia> mediaPhotos) throws MalformedURLException {
+    public void sendMedia(String chatId, List<InputMedia> mediaPhotos, String text) throws MalformedURLException {
         InlineKeyboardMarkup markupInLine = postControl();
         try {
-            if(mediaPhotos.size() < 3) {
-
+            if(mediaPhotos.size() < 2) {
+                InputFile file = new InputFile(mediaPhotos.get(0).getNewMediaStream(), "photo.jpg");
+                SendPhoto sendPhoto = new SendPhoto(chatId, file);
+                sendPhoto.setCaption(text);
+                sendPhoto.setReplyMarkup(markupInLine);
+                telegramBot.execute(sendPhoto);
             } else {
                 SendMediaGroup sendMediaGroup = new SendMediaGroup(chatId, mediaPhotos);
                 telegramBot.execute(sendMediaGroup);
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setReplyMarkup(markupInLine);
+                sendMessage.setText(text);
+                sendMessage.setChatId(chatId);
+                telegramBot.execute(sendMessage);
             }
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);

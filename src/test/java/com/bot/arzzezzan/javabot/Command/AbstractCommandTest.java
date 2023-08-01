@@ -10,6 +10,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.IOException;
+
 /**
  * Abstract class for testing {@link Command}s.
  */
@@ -24,7 +27,7 @@ abstract class AbstractCommandTest {
     abstract String getCommandMessage();
     abstract Command getCommand();
     @Test
-    public void shouldProperlyExecuteCommand() throws TelegramApiException {
+    public void shouldProperlyExecuteCommand() throws TelegramApiException, IOException {
         //given
         Long chatId = 1234567824356L;
         Update update = new Update();
