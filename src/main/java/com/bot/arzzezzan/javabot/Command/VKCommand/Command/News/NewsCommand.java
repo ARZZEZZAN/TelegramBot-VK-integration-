@@ -17,16 +17,19 @@ import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.bot.arzzezzan.javabot.Command.VKCommand.Command.News.NewsManagerName.*;
 
@@ -34,9 +37,8 @@ public class NewsCommand implements Command {
     private SendBotMessageService sendBotMessageService;
     private VkApiClient vk;
     private UserActor userActor;
-    private int messageId;
     private Update update;
-    private boolean isEdit;
+    private List<InputMedia> inputMediaPhotos = new ArrayList<>();
     com.vk.api.sdk.objects.newsfeed.responses.GetResponse posts;
 
     public NewsCommand(SendBotMessageService sendBotMessageService, VkApiClient vk, UserActor userActor) {
@@ -78,8 +80,10 @@ public class NewsCommand implements Command {
         }
     }
     private void getNews() {
+        inputMediaPhotos = new ArrayList<>();
         StringBuilder newsBuilder = new StringBuilder();
         String startFrom = null;
+        boolean isPhoto = false;
         try {
             if(posts != null) {
                 startFrom = posts.getNextFrom();
@@ -101,7 +105,8 @@ public class NewsCommand implements Command {
                 if (attachments != null && !attachments.isEmpty()) {
                     for (WallpostAttachment attachment : attachments) {
                         if (attachment.getPhoto() != null) {
-                            photoAttachmentHandler(newsBuilder, item, group, text, attachment);
+                            isPhoto = true;
+                            addPhotoToList(newsBuilder, attachment);
                         } else if (attachment.getVideo() != null) {
                             videoAttachmentHandler(newsBuilder, attachment);
                         } else if (attachment.getLink() != null) {
@@ -110,14 +115,32 @@ public class NewsCommand implements Command {
                             docAttachmentHandler(newsBuilder, attachment);
                         }
                     }
+                    if(isPhoto) {
+                        mediaAttachmentHandler(newsBuilder, item, group, text);
+                    }
                 } else {
                     sendBotMessageService.sendMessagePost(update.getCallbackQuery().getMessage().getChatId().toString(),
                             newsBuilder.toString());
                 }
                 newsBuilder = new StringBuilder();
             }
-        } catch (ClientException | ApiException e) {
+        } catch (ClientException | ApiException | IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void addPhotoToList(StringBuilder newsBuilder, WallpostAttachment attachment) throws IOException {
+        Photo photo = attachment.getPhoto();
+        URL url = new URL(photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString());
+        try(InputStream inputStream = url.openStream()) {
+            byte[] photoBytes = inputStream.readAllBytes();
+            InputFile file = new InputFile(new ByteArrayInputStream(photoBytes), "photo.jpg");
+            InputMediaPhoto inputMediaPhoto = new InputMediaPhoto();
+            inputMediaPhoto.setMedia(file.getNewMediaStream(), "photo.jpg");
+            inputMediaPhoto.setCaption(newsBuilder.toString());
+            inputMediaPhotos.add(inputMediaPhoto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -140,7 +163,20 @@ public class NewsCommand implements Command {
             throw new RuntimeException(e);
         }
     }
-
+    private void mediaAttachmentHandler(StringBuilder newsBuilder, NewsfeedNewsfeedItemOneOf item, Group group, String text) {
+        try {
+            if (text.length() > 1024) {
+                newsBuilder = new StringBuilder(newsBuilder.substring(0, 940) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("https://vk.com/wall-%d_%d",
+                        group.getId(),
+                        item.getOneOf0().getPostId()));
+            }
+            inputMediaPhotos.get(0).setCaption(newsBuilder.toString());
+            sendBotMessageService.sendMedia(update.getCallbackQuery().getMessage().getChatId().toString(),
+                        inputMediaPhotos);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private void photoAttachmentHandler(StringBuilder newsBuilder, NewsfeedNewsfeedItemOneOf item, Group group, String text, WallpostAttachment attachment) {
         try {
             if (text.length() > 1024) {
@@ -151,7 +187,7 @@ public class NewsCommand implements Command {
             Photo photo = attachment.getPhoto();
             String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
             sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
-                        photoUrl, newsBuilder.toString());
+                    photoUrl, newsBuilder.toString());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

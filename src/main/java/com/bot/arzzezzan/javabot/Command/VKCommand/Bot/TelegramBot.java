@@ -13,6 +13,8 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 
+import java.io.IOException;
+
 import static com.bot.arzzezzan.javabot.Command.CommandName.UNKNOWN;
 
 
@@ -44,9 +46,17 @@ public class TelegramBot extends TelegramLongPollingBot {
             String message = update.getMessage().getText().trim();
             if(message.startsWith(COMMAND_PREFIX)) {
                 String commandIdentifier = message.split(" ")[0].toLowerCase();
-                commandContainer.getCommand(commandIdentifier).execute(update);
+                try {
+                    commandContainer.getCommand(commandIdentifier).execute(update);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else {
-                commandContainer.getCommand(UNKNOWN.getCommandName()).execute(update);
+                try {
+                    commandContainer.getCommand(UNKNOWN.getCommandName()).execute(update);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         } else if (update.hasCallbackQuery()) {
             accountManager.commandManagerHandler();
