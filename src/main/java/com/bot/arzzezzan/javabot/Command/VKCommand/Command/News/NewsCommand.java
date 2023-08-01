@@ -10,10 +10,12 @@ import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.groups.Group;
 import com.vk.api.sdk.objects.newsfeed.Filters;
 import com.vk.api.sdk.objects.photos.Photo;
+import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
 
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -21,6 +23,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -39,6 +42,7 @@ public class NewsCommand implements Command {
     private UserActor userActor;
     private Update update;
     private List<InputMedia> inputMediaPhotos = new ArrayList<>();
+    private List<InputMedia> inputMediaVideos = new ArrayList<>();
     com.vk.api.sdk.objects.newsfeed.responses.GetResponse posts;
 
     public NewsCommand(SendBotMessageService sendBotMessageService, VkApiClient vk, UserActor userActor) {
@@ -84,6 +88,7 @@ public class NewsCommand implements Command {
         StringBuilder newsBuilder = new StringBuilder();
         String startFrom = null;
         boolean isPhoto = false;
+        boolean isVideo = false;
         try {
             if(posts != null) {
                 startFrom = posts.getNextFrom();
@@ -106,9 +111,10 @@ public class NewsCommand implements Command {
                     for (WallpostAttachment attachment : attachments) {
                         if (attachment.getPhoto() != null) {
                             isPhoto = true;
-                            addPhotoToList(newsBuilder, attachment);
+                            addPhotoToList(newsBuilder, attachment, item, group);
                         } else if (attachment.getVideo() != null) {
-                            videoAttachmentHandler(newsBuilder, attachment);
+                            isVideo = true;
+                            addVideoToList(newsBuilder, attachment);
                         } else if (attachment.getLink() != null) {
                             linkAttachmentHandler(newsBuilder, attachment);
                         } else if(attachment.getDoc() != null) {
@@ -117,6 +123,8 @@ public class NewsCommand implements Command {
                     }
                     if(isPhoto) {
                         mediaAttachmentHandler(newsBuilder, item, group, text);
+                    } else if (isVideo) {
+                        videoAttachmentHandler(newsBuilder);
                     }
                 } else {
                     sendBotMessageService.sendMessagePost(update.getCallbackQuery().getMessage().getChatId().toString(),
@@ -129,17 +137,43 @@ public class NewsCommand implements Command {
         }
     }
 
-    private void addPhotoToList(StringBuilder newsBuilder, WallpostAttachment attachment) throws IOException {
+    private void addPhotoToList(StringBuilder newsBuilder, WallpostAttachment attachment, NewsfeedNewsfeedItemOneOf item, Group group) throws IOException {
+        if (newsBuilder.toString().length() > 1024) {
+            newsBuilder = new StringBuilder(newsBuilder.substring(0, 940) + "...\nОзнакомиться с полной записью тут: " + String.format("https://vk.com/wall-%d_%d",
+                    group.getId(),
+                    item.getOneOf0().getPostId()));
+        }
         Photo photo = attachment.getPhoto();
         URL url = new URL(photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString());
         try(InputStream inputStream = url.openStream()) {
             byte[] photoBytes = inputStream.readAllBytes();
-            InputFile file = new InputFile(new ByteArrayInputStream(photoBytes), "photo.jpg");
+            InputFile file = new InputFile(new ByteArrayInputStream(photoBytes), photo.getAccessKey() + ".jpg");
             InputMediaPhoto inputMediaPhoto = new InputMediaPhoto();
             inputMediaPhoto.setMedia(file.getNewMediaStream(), "photo.jpg");
             inputMediaPhoto.setCaption(newsBuilder.toString());
             inputMediaPhotos.add(inputMediaPhoto);
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void addVideoToList(StringBuilder newsBuilder, WallpostAttachment attachment)  {
+        try {
+            GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
+                    attachment.getVideo().getId() + "_" +
+                    attachment.getVideo().getAccessKey()).execute();
+            URL url = new URL(response.getItems().get(0).getPlayer().toString());
+            try (InputStream inputStream = url.openStream()) {
+                byte[] videoBytes = inputStream.readAllBytes();
+                InputFile file = new InputFile(new ByteArrayInputStream(videoBytes), response.getCount().toString() + ".mp4");
+                InputMediaVideo inputMediaVideo = new InputMediaVideo();
+                inputMediaVideo.setMedia(file.getNewMediaStream(), "video.mp4");
+                inputMediaVideo.setCaption(newsBuilder.toString());
+                inputMediaVideo.setNewMediaFile(file.getNewMediaFile());
+                inputMediaVideos.add(inputMediaVideo);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (ClientException | ApiException | MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -150,44 +184,24 @@ public class NewsCommand implements Command {
                 newsBuilder.toString());
     }
 
-    private void videoAttachmentHandler(StringBuilder newsBuilder, WallpostAttachment attachment) {
+    private void videoAttachmentHandler(StringBuilder newsBuilder) {
         try {
-            GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
-                    attachment.getVideo().getId() + "_" +
-                    attachment.getVideo().getAccessKey()).execute();
             sendBotMessageService.sendVideo(update.getCallbackQuery().getMessage().getChatId().toString(),
-                    response, newsBuilder.toString());
-        } catch (ClientException | ApiException e) {
-            e.printStackTrace();
+                    inputMediaVideos, newsBuilder.toString());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
     private void mediaAttachmentHandler(StringBuilder newsBuilder, NewsfeedNewsfeedItemOneOf item, Group group, String text) {
         try {
             if (text.length() > 1024) {
-                newsBuilder = new StringBuilder(newsBuilder.substring(0, 940) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("https://vk.com/wall-%d_%d",
+                newsBuilder = new StringBuilder(newsBuilder.substring(0, 940) + "...\nОзнакомиться с полной записью тут: " + String.format("https://vk.com/wall-%d_%d",
                         group.getId(),
                         item.getOneOf0().getPostId()));
             }
             inputMediaPhotos.get(0).setCaption(newsBuilder.toString());
             sendBotMessageService.sendMedia(update.getCallbackQuery().getMessage().getChatId().toString(),
                         inputMediaPhotos, newsBuilder.toString());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    private void photoAttachmentHandler(StringBuilder newsBuilder, NewsfeedNewsfeedItemOneOf item, Group group, String text, WallpostAttachment attachment) {
-        try {
-            if (text.length() > 1024) {
-                newsBuilder = new StringBuilder(newsBuilder.substring(0, 940) + "...\nОзнакомиться со всей записью можно по ссылке: " + String.format("https://vk.com/wall-%d_%d",
-                        group.getId(),
-                        item.getOneOf0().getPostId()));
-            }
-            Photo photo = attachment.getPhoto();
-            String photoUrl = photo.getSizes().get(photo.getSizes().size() - 1).getUrl().toString();
-            sendBotMessageService.sendPhoto(update.getCallbackQuery().getMessage().getChatId().toString(),
-                    photoUrl, newsBuilder.toString());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

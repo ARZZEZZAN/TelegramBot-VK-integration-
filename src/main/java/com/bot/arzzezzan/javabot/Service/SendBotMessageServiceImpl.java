@@ -2,6 +2,7 @@ package com.bot.arzzezzan.javabot.Service;
 
 import com.bot.arzzezzan.javabot.Command.VKCommand.Bot.TelegramBot;
 import com.vk.api.sdk.objects.docs.Doc;
+import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.video.VideoFull;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -39,15 +41,6 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
 
         try {
             telegramBot.execute(sendMessage);
-        } catch(TelegramApiException telegramApiException) {
-            telegramApiException.printStackTrace();
-        }
-    }
-
-    @Override
-    public void sendMessage(EditMessageText editMessageText) {
-        try {
-            telegramBot.execute(editMessageText);
         } catch(TelegramApiException telegramApiException) {
             telegramApiException.printStackTrace();
         }
@@ -84,7 +77,6 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
             telegramApiException.printStackTrace();
         }
     }
-
     @Override
     public void sendMedia(String chatId, List<InputMedia> mediaPhotos, String text) throws MalformedURLException {
         InlineKeyboardMarkup markupInLine = postControl();
@@ -108,39 +100,28 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
             throw new RuntimeException(e);
         }
     }
-    public void sendPhoto(String chatId, String photoUrl, String text) throws MalformedURLException {
-        InlineKeyboardMarkup markupInLine = postControl();
-
-        URL url = new URL(photoUrl);
-        try(InputStream inputStream = url.openStream()) {
-            byte[] photoBytes = inputStream.readAllBytes();
-            InputFile file = new InputFile(new ByteArrayInputStream(photoBytes), "photo.jpg");
-            SendPhoto sendPhoto = new SendPhoto(chatId, file);
-            sendPhoto.setCaption(text);
-            sendPhoto.setReplyMarkup(markupInLine);
-            telegramBot.execute(sendPhoto);
-        } catch (IOException | TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
-    public void sendVideo(String chatId, GetResponse response, String text) {
+    public void sendVideo(String chatId, List<InputMedia> inputMediaVideos, String text) {
         InlineKeyboardMarkup markupInLine = postControl();
 
-        VideoFull vi = response.getItems().get(0);
-        if(vi.getFiles() != null) {
-            try {
-                SendVideo sendVideo = new SendVideo(chatId, new InputFile(new URL(vi.getFiles().getMp4720().toString()).openStream(), "video.mp4"));
+        try {
+            if(inputMediaVideos.size() < 2) {
+                InputFile file = new InputFile(inputMediaVideos.get(0).getNewMediaStream(), "video.mp4");
+                SendVideo sendVideo = new SendVideo(chatId, file);
                 sendVideo.setCaption(text);
                 sendVideo.setReplyMarkup(markupInLine);
                 telegramBot.execute(sendVideo);
-            } catch (IOException | TelegramApiException e) {
-                e.printStackTrace();
+            } else {
+                SendMediaGroup sendMediaGroup = new SendMediaGroup(chatId, inputMediaVideos);
+                telegramBot.execute(sendMediaGroup);
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setReplyMarkup(markupInLine);
+                sendMessage.setText(text);
+                sendMessage.setChatId(chatId);
+                telegramBot.execute(sendMessage);
             }
-        } else {
-            String videoUrl = String.valueOf(vi.getPlayer());
-            sendMessagePost(chatId, text + "Ссылка на видео: " + videoUrl);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 
@@ -149,7 +130,7 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
         InlineKeyboardMarkup markupInLine = postControl();
 
         try {
-            SendDocument sendDocument = new SendDocument(chatId, new InputFile(new URL(doc.getUrl().toString()).openStream(), doc.getTitle() + ".pdf"));
+            SendDocument sendDocument = new SendDocument(chatId, new InputFile(new URL(doc.getUrl().toString()).openStream(), doc.getTitle()));
             sendDocument.setCaption(text);
             sendDocument.setReplyMarkup(markupInLine);
             telegramBot.execute(sendDocument);
