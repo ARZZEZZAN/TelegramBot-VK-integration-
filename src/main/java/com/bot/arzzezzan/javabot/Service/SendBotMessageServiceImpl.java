@@ -88,6 +88,19 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     }
 
     @Override
+    public void sendMedia(String chatId, List<InputMedia> mediaPhotos) throws MalformedURLException {
+        InlineKeyboardMarkup markupInLine = postControl();
+        try {
+            if(mediaPhotos.size() < 3) {
+
+            } else {
+                SendMediaGroup sendMediaGroup = new SendMediaGroup(chatId, mediaPhotos);
+                telegramBot.execute(sendMediaGroup);
+            }
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public void sendPhoto(String chatId, String photoUrl, String text) throws MalformedURLException {
         InlineKeyboardMarkup markupInLine = postControl();
 
@@ -129,7 +142,7 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
         InlineKeyboardMarkup markupInLine = postControl();
 
         try {
-            SendDocument sendDocument = new SendDocument(chatId, new InputFile(new URL(doc.getUrl().toString()).openStream(), "doc.pdf"));
+            SendDocument sendDocument = new SendDocument(chatId, new InputFile(new URL(doc.getUrl().toString()).openStream(), doc.getTitle() + ".pdf"));
             sendDocument.setCaption(text);
             sendDocument.setReplyMarkup(markupInLine);
             telegramBot.execute(sendDocument);
