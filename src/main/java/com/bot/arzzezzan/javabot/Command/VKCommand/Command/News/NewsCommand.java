@@ -10,7 +10,6 @@ import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.groups.Group;
 import com.vk.api.sdk.objects.newsfeed.Filters;
 import com.vk.api.sdk.objects.photos.Photo;
-import com.vk.api.sdk.objects.video.Video;
 import com.vk.api.sdk.objects.video.responses.GetResponse;
 import com.vk.api.sdk.objects.wall.WallpostAttachment;
 import com.vk.api.sdk.oneofs.NewsfeedNewsfeedItemOneOf;
@@ -21,6 +20,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Video;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
@@ -31,6 +31,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class NewsCommand implements Command {
 
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(update.getCallbackQuery().getMessage().getChatId()));
-        message.setText("Управляйте своими нвостями!");
+        message.setText("Управляйте своими новостями!");
 
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -149,7 +151,7 @@ public class NewsCommand implements Command {
             byte[] photoBytes = inputStream.readAllBytes();
             InputFile file = new InputFile(new ByteArrayInputStream(photoBytes), photo.getAccessKey() + ".jpg");
             InputMediaPhoto inputMediaPhoto = new InputMediaPhoto();
-            inputMediaPhoto.setMedia(file.getNewMediaStream(), "photo.jpg");
+            inputMediaPhoto.setMedia(file.getNewMediaStream(), photo.getAccessKey() + ".jpg");
             inputMediaPhoto.setCaption(newsBuilder.toString());
             inputMediaPhotos.add(inputMediaPhoto);
         } catch (IOException e) {
@@ -164,7 +166,8 @@ public class NewsCommand implements Command {
             URL url = new URL(response.getItems().get(0).getPlayer().toString());
             try (InputStream inputStream = url.openStream()) {
                 byte[] videoBytes = inputStream.readAllBytes();
-                InputFile file = new InputFile(new ByteArrayInputStream(videoBytes), response.getCount().toString() + ".mp4");
+                InputFile file = new InputFile(new ByteArrayInputStream(videoBytes), response.hashCode() + ".mp4");
+
                 InputMediaVideo inputMediaVideo = new InputMediaVideo();
                 inputMediaVideo.setMedia(file.getNewMediaStream(), "video.mp4");
                 inputMediaVideo.setCaption(newsBuilder.toString());
