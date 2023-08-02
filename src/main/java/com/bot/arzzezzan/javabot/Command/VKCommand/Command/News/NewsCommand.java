@@ -44,7 +44,7 @@ public class NewsCommand implements Command {
     private UserActor userActor;
     private Update update;
     private List<InputMedia> inputMediaPhotos = new ArrayList<>();
-    private List<InputMedia> inputMediaVideos = new ArrayList<>();
+    private List<String> inputMediaVideos = new ArrayList<>();
     com.vk.api.sdk.objects.newsfeed.responses.GetResponse posts;
 
     public NewsCommand(SendBotMessageService sendBotMessageService, VkApiClient vk, UserActor userActor) {
@@ -87,6 +87,7 @@ public class NewsCommand implements Command {
     }
     private void getNews() {
         inputMediaPhotos = new ArrayList<>();
+        inputMediaVideos = new ArrayList<>();
         StringBuilder newsBuilder = new StringBuilder();
         String startFrom = null;
         boolean isPhoto = false;
@@ -116,7 +117,7 @@ public class NewsCommand implements Command {
                             addPhotoToList(newsBuilder, attachment, item, group);
                         } else if (attachment.getVideo() != null) {
                             isVideo = true;
-                            addVideoToList(newsBuilder, attachment);
+                            addVideoToList(attachment);
                         } else if (attachment.getLink() != null) {
                             linkAttachmentHandler(newsBuilder, attachment);
                         } else if(attachment.getDoc() != null) {
@@ -158,25 +159,14 @@ public class NewsCommand implements Command {
             throw new RuntimeException(e);
         }
     }
-    private void addVideoToList(StringBuilder newsBuilder, WallpostAttachment attachment)  {
+    private void addVideoToList(WallpostAttachment attachment)  {
         try {
             GetResponse response = vk.videos().get(userActor).videos(attachment.getVideo().getOwnerId().toString() + "_" +
                     attachment.getVideo().getId() + "_" +
                     attachment.getVideo().getAccessKey()).execute();
-            URL url = new URL(response.getItems().get(0).getPlayer().toString());
-            try (InputStream inputStream = url.openStream()) {
-                byte[] videoBytes = inputStream.readAllBytes();
-                InputFile file = new InputFile(new ByteArrayInputStream(videoBytes), response.hashCode() + ".mp4");
-
-                InputMediaVideo inputMediaVideo = new InputMediaVideo();
-                inputMediaVideo.setMedia(file.getNewMediaStream(), "video.mp4");
-                inputMediaVideo.setCaption(newsBuilder.toString());
-                inputMediaVideo.setNewMediaFile(file.getNewMediaFile());
-                inputMediaVideos.add(inputMediaVideo);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } catch (ClientException | ApiException | MalformedURLException e) {
+            String url = response.getItems().get(0).getPlayer().toString();
+            inputMediaVideos.add(url);
+        } catch (ClientException | ApiException e) {
             throw new RuntimeException(e);
         }
     }
@@ -189,8 +179,17 @@ public class NewsCommand implements Command {
 
     private void videoAttachmentHandler(StringBuilder newsBuilder) {
         try {
+            if(inputMediaVideos.size() < 2) {
+                newsBuilder.append("Ссылка на видео: \n");
+                newsBuilder.append(inputMediaVideos.get(0));
+            } else {
+                newsBuilder.append("Ссылки на видео: \n");
+                for(int i = 0; i < inputMediaVideos.size(); i++) {
+                    newsBuilder.append((i + 1) + ") " + inputMediaVideos.get(i) + "\n");
+                }
+            }
             sendBotMessageService.sendVideo(update.getCallbackQuery().getMessage().getChatId().toString(),
-                    inputMediaVideos, newsBuilder.toString());
+                    newsBuilder.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

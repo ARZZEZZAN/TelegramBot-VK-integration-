@@ -20,7 +20,7 @@ public interface SendBotMessageService {
     public void sendMessageMarkup(EditMessageReplyMarkup message);
     public void sendMessageMarkup(SendMessage message);
     public void sendMedia(String chatId, List<InputMedia> mediaPhotos, String text) throws MalformedURLException;
-    public void sendVideo(String chatId, List<InputMedia> inputMediaVideos, String text) throws MalformedURLException;
+    public void sendVideo(String chatId, String text) throws MalformedURLException;
     public void sendDoc(String chatId, Doc doc, String text);
 
 }
