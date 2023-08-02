@@ -101,28 +101,8 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
         }
     }
     @Override
-    public void sendVideo(String chatId, List<InputMedia> inputMediaVideos, String text) {
-        InlineKeyboardMarkup markupInLine = postControl();
-
-        try {
-            if(inputMediaVideos.size() < 2) {
-                InputFile file = new InputFile(inputMediaVideos.get(0).getNewMediaStream(), "video.mp4");
-                SendVideo sendVideo = new SendVideo(chatId, file);
-                sendVideo.setCaption(text);
-                sendVideo.setReplyMarkup(markupInLine);
-                telegramBot.execute(sendVideo);
-            } else {
-                SendMediaGroup sendMediaGroup = new SendMediaGroup(chatId, inputMediaVideos);
-                telegramBot.execute(sendMediaGroup);
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setReplyMarkup(markupInLine);
-                sendMessage.setText(text);
-                sendMessage.setChatId(chatId);
-                telegramBot.execute(sendMessage);
-            }
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+    public void sendVideo(String chatId, String text) {
+        sendMessagePost(chatId, text);
     }
 
     @Override
