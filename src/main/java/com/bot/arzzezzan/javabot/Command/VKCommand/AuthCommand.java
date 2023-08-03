@@ -4,21 +4,12 @@ import com.bot.arzzezzan.javabot.Command.Command;
 import com.bot.arzzezzan.javabot.Service.SendBotMessageService;
 import com.bot.arzzezzan.javabot.Service.TelegramUserService;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.FRIEND;
-import static com.bot.arzzezzan.javabot.Command.VKCommand.CommandManagerName.NEWS;
 
 @Component
 public class AuthCommand implements Command {
         public final static String CLIENT_ID = "51700494";
-        private final static String USER_ID = "429866479";
         private final static String REDIRECT_URI = "https://oauth.vk.com/blank.html";
         private final static String VK_API_VERSION = "5.131";
         private final SendBotMessageService sendBotMessageService;
@@ -40,6 +31,7 @@ public class AuthCommand implements Command {
 
         private String getAuthorizationUrl() {
             return "Для регистрации перейдите по ссылке: <a href=\"https://oauth.vk.com/authorize?client_id=" + CLIENT_ID + "&display=page&redirect_uri=" + REDIRECT_URI +
-                    "&scope=video,photos,likes,groups,friends,wall,stats,offline&response_type=token&v=" + VK_API_VERSION + "\">ссылка на авторизацию</a>";
+                    "&scope=video,photos,likes,groups,friends,wall,stats,offline&response_type=token&v=" + VK_API_VERSION + "\">ссылка на авторизацию</a>\n" +
+                    "Пришлите токен после регистрации в чат, токен находится в адрессной строке, в аргументе access_token.";
         }
 }
